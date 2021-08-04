@@ -19,6 +19,7 @@
 #include "cdc.h"
 #include "usb.h"
 #include "uart.h"
+#include "log.h"
 
 void hwInit(void);
 

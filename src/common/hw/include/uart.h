@@ -19,7 +19,7 @@
 bool     uartInit(void);
 bool     uartOpen(uint8_t ch , uint32_t baud);
 bool     uartClose(uint8_t ch);
-bool     uartIsopen(uint8_ch);
+bool     uartIsopen();
 
 uint32_t uartAvailable(uint8_t);
 uint8_t  uartRead(uint8_t ch);

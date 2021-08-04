@@ -29,5 +29,6 @@ void hwInit(void)
   usbBegin(USB_CDC_MODE);
 
   uartInit();
+  uartOpen(_DEF_UART1, 57600);
 
 }

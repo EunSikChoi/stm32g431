@@ -32,6 +32,8 @@ void apMain(void)
       pre_time = millis();
      // ledToggle(0);
       ledToggle(1);
+
+      logPrintf("test %X\n", millis());
     }
 
 
