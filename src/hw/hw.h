@@ -20,6 +20,7 @@
 #include "usb.h"
 #include "uart.h"
 #include "log.h"
+#include "cli.h"
 
 void hwInit(void);
 

@@ -8,6 +8,7 @@
 
 #include "usb.h"
 #include "cdc.h"
+#include "cli.h"
 
 #ifdef _USE_HW_USB
 #include "usbd_core.h"

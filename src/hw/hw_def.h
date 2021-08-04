@@ -28,6 +28,11 @@
 #define _USE_HW_CDC
 #define _USE_HW_USB
 
+#define _USE_HW_CLI
+#define      HW_CLI_CMD_NAME_MAX    16
+#define      HW_CLI_CMD_LIST_MAX    16
+#define      HW_CLI_LINE_HIS_MAX    4
+#define      HW_CLI_LINE_BUF_MAX    64
 
 
 #define      HW_USE_CDC     1

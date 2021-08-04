@@ -14,6 +14,7 @@
 
 void apInit(void)
 {
+  cliOpen(_DEF_UART1, 57600);  //CDC//FOR USB
 
 }
 
@@ -26,14 +27,10 @@ void apMain(void)
   while(1)
   {
 
-
     if(millis()- pre_time >= 1100)
     {
       pre_time = millis();
-     // ledToggle(0);
       ledToggle(1);
-
-      logPrintf("test %X\n", millis());
     }
 
 
@@ -46,17 +43,10 @@ void apMain(void)
         ledOff(0);
     }
 
-    if(uartAvailable(_DEF_UART1) > 0)
-    {
-      uint8_t rx_data;
-      rx_data = uartRead(_DEF_UART1);
 
-      uartWrite(_DEF_UART1, "RxData : " , 10);
-      uartWrite(_DEF_UART1, &rx_data, 1);
-      uartWrite(_DEF_UART1, "\n", 2);
-    }
-
-
+  #ifdef _USE_HW_CLI
+    cliMain();
+  #endif
 
   }
 }

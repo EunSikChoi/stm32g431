@@ -16,7 +16,7 @@
 #ifdef _USE_HW_LOG
 
 
-static uint8_t log_ch = LOG_CH;
+static uint8_t log_ch = HW_LOG_CH;
 static char print_buf[256];
 
 #ifdef _USE_HW_ROTS

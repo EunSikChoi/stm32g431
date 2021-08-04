@@ -15,6 +15,8 @@ void hwInit(void)
 
   bspInit();
 
+  cliInit();
+
   rtcInit();
   resetInit();
   ledInit();
