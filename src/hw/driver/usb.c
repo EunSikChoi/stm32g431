@@ -62,12 +62,12 @@ void usbDeInit(void)
   }
 }
 
-bool usbIsOpen(void)
+bool usbIsOpen(void) // check DTR bit // comm connect flag //
 {
   return cdcIsConnect();
 }
 
-bool usbIsConnect(void)
+bool usbIsConnect(void) // update DTR bit //
 {
   if (hUsbDeviceFS.pClassData == NULL)
   {

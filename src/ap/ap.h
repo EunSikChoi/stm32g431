@@ -16,5 +16,10 @@
 void apInit(void);
 void apMain(void);
 
+typedef struct
+{
+  bool (*keepLoop)(void);
+} mode_args_t;
+
 
 #endif /* SRC_AP_AP_H_ */

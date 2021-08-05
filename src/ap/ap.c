@@ -10,6 +10,8 @@
 
 
 #include "ap.h"
+#include "mode/cli_mode.h"
+#include "mode/can_mode.h"
 
 
 typedef enum
@@ -19,19 +21,22 @@ typedef enum
   MODE_CAN,
 } ap_mode_t;
 
+
 ap_mode_t mode = MODE_IDEL;
 ap_mode_t mode_next = MODE_IDEL;
 
 static void apLedUpdate(void);
 static bool apLoopIdle(void);
 static void apGetModeNext(ap_mode_t *p_mode_next);
-static void apModeCli(void);
-static void apModeCan(void);
+
+static mode_args_t mode_args;
 
 
 void apInit(void)
 {
   cliOpen(_DEF_UART1, 57600);  //CDC//FOR USB
+
+  mode_args.keepLoop = apLoopIdle; // define point func // keepLoop = apLoopIdle
 
 }
 
@@ -40,21 +45,19 @@ void apMain(void)
 
   while(1)
   {
-
-    apLoopIdle();
-
     switch(mode)
     {
-    case MODE_CLI:
-      apModeCli();
-      break;
+      case MODE_CLI:
+        cliModeMain(&mode_args);
+        break;
 
-    case MODE_CAN:
-      apModeCan();
-      break;
+      case MODE_CAN:
+        canModeMain(&mode_args);
+        break;
 
-    default:
-      break;
+      default:
+        apLoopIdle();
+        break;
     }
   }// END While
 }// END apMain
@@ -65,20 +68,20 @@ void apLedUpdate(void)
   uint32_t pre_time;
   pre_time = millis();
 
-  if(millis()- pre_time >= 1100)
+  if(millis()- pre_time >= 2000)
   {
     pre_time = millis();
-    ledToggle(1);
+    ledToggle(_DEF_LED1);//RED
   }
 
 
-  if (uartIsopen() == true)
+  if (usbIsOpen() == true)
   {
-      ledOn(0);
+      ledOn(_DEF_LED2);
   }
   else
   {
-      ledOff(0);
+      ledOff(_DEF_LED2);//GREEN
   }
 
 }
@@ -89,13 +92,17 @@ bool apLoopIdle(void)
   bool ret = true;
   apGetModeNext(&mode_next);
 
-  apLedUpdate();
+  if (mode == MODE_IDEL )
+  {
+    apLedUpdate();
+  }
 
   if(mode != mode_next )
   {
     uartPrintf(_DEF_UART1, "\n Change bps: %d\n", uartGetBaud(_DEF_UART1));
     mode = mode_next;
     ret = false;
+
   }
 
   return ret;
@@ -114,22 +121,14 @@ void apGetModeNext(ap_mode_t *p_mode_next)
    *p_mode_next = MODE_CLI;
  }
 
+ if (usbIsOpen() != true)
+ {
+   *p_mode_next = MODE_IDEL;
+   ledOff(_DEF_LED1); //RED
+ }
+
+
 }
 
 
-
-void apModeCli(void)
-{
-#ifdef _USE_HW_CLI
-  cliMain();
-#endif
-}
-
-void apModeCan(void)
-{
-  if (uartAvailable(_DEF_UART1) > 0)
-  {
-    uartPrintf(_DEF_UART1, "RX : 0x%X\n", uartRead(_DEF_UART1));
-  }
-}
 
