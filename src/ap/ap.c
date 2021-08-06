@@ -65,8 +65,7 @@ void apMain(void)
 void apLedUpdate(void)
 {
 
-  uint32_t pre_time;
-  pre_time = millis();
+  static uint32_t pre_time = 0;
 
   if(millis()- pre_time >= 2000)
   {
@@ -124,7 +123,7 @@ void apGetModeNext(ap_mode_t *p_mode_next)
  if (usbIsOpen() != true)
  {
    *p_mode_next = MODE_IDEL;
-   ledOff(_DEF_LED1); //RED
+   //ledOff(_DEF_LED1); //RED
  }
 
 
