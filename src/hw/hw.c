@@ -21,6 +21,8 @@ void hwInit(void)
   resetInit();
   ledInit();
 
+  MX_FDCAN1_Init();
+
   if( resetGetCount() == 2)
   {
     //jump to system bootloader //  시스템 부트 로더 실행 //

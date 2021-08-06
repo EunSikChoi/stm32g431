@@ -21,6 +21,8 @@
 #include "uart.h"
 #include "log.h"
 #include "cli.h"
+#include "fdcan.h"
+
 
 void hwInit(void);
 
