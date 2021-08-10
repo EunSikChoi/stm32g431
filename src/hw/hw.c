@@ -21,8 +21,6 @@ void hwInit(void)
   resetInit();
   ledInit();
 
-  MX_FDCAN1_Init();
-
   if( resetGetCount() == 2)
   {
     //jump to system bootloader //  시스템 부트 로더 실행 //
@@ -34,5 +32,7 @@ void hwInit(void)
 
   uartInit();
   uartOpen(_DEF_UART1, 57600);
+
+  canInit();
 
 }
