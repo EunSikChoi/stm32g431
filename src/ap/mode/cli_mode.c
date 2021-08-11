@@ -15,6 +15,7 @@ FDCAN_RxHeaderTypeDef RxHeader;
 extern uint8_t RxData[8];
 FDCAN_TxHeaderTypeDef TxHeader;
 extern uint8_t TxData[8];
+extern FDCAN_HandleTypeDef hfdcan1;
 
 
 bool cliModeInit(void)
@@ -36,9 +37,21 @@ bool cliModeInit(void)
        pre_time = millis();
        ledToggle(_DEF_LED1);
 
+
+//       TxHeader.Identifier = 0x119;
+//       TxHeader.IdType = FDCAN_STANDARD_ID;
+//       TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+//       TxHeader.DataLength = FDCAN_DLC_BYTES_3;
+//       TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+//       TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+//       TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
+//       TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+//       TxHeader.MessageMarker = 0;
+
        /* Set the data to be transmitted */
        TxData[0] = ubKeyNumber;
        TxData[1] = 0xAD;
+       TxData[2] = 0xBD;
 
        /* Start the Transmission process */
        if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData) != HAL_OK)

@@ -28,32 +28,88 @@ uint8_t RxData[8];
 FDCAN_TxHeaderTypeDef TxHeader;
 uint8_t TxData[8];
 
-/* USER CODE END 0 */
+
 
 FDCAN_HandleTypeDef hfdcan1;
 
-/* FDCAN1 init function */
-void MX_FDCAN1_Init(void)
+typedef struct
 {
+  uint32_t prescalse;
+  uint32_t sjw;
+  uint32_t tseg1;
+  uint32_t tseg2;
+}can_baud_cfg_t ;
 
-  hfdcan1.Instance = FDCAN1;
+
+
+
+can_baud_cfg_t can_baud_cfg_80m_normal[] =
+{
+    {50, 8, 13, 2}, // 100K, 87.5%
+    {40, 8, 13, 2}, // 125K, 87.5%
+    {20, 8, 13, 2}, // 250K, 87.5%
+    {10, 8, 13, 2}, // 500K, 87.5%
+    {5,  8, 13, 2}, // 1M,   87.5%
+};
+
+can_baud_cfg_t can_baud_cfg_80m_data[] =
+{
+    {40, 8, 11, 8}, // 100K, 60%
+    {32, 8, 11, 8}, // 125K, 60%
+    {16, 8, 11, 8}, // 250K, 60%
+    {8,  8, 11, 8}, // 500K, 60%
+    {4,  8, 11, 8}, // 1M,   60%
+    {2,  8, 11, 8}, // 2M    60%
+    {1,  8, 11, 8}, // 4M    60%
+    {1,  8,  9, 6}, // 5M    62.5%
+};
+
+
+
+
+can_baud_cfg_t *p_can_baud = can_baud_cfg_80m_normal;
+can_baud_cfg_t *p_can_data = can_baud_cfg_80m_data;
+
+
+uint32_t mode_tbl[] =
+{
+    FDCAN_MODE_NORMAL,
+    FDCAN_MODE_BUS_MONITORING,
+    FDCAN_MODE_INTERNAL_LOOPBACK
+};
+
+uint32_t frame_tbl[] =
+{
+    FDCAN_FRAME_CLASSIC,
+    FDCAN_FRAME_FD_NO_BRS,
+    FDCAN_FRAME_FD_BRS
+};
+
+
+
+bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, can_baud_t data )
+{
+  bool ret =  true;
+
+  hfdcan1.Instance          = FDCAN1;
   hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan1.Init.FrameFormat  = FDCAN_FRAME_CLASSIC;
-  hfdcan1.Init.Mode         = FDCAN_MODE_NORMAL;
+  hfdcan1.Init.FrameFormat  = frame_tbl[frame];
+  hfdcan1.Init.Mode         = mode_tbl[mode];
 
   hfdcan1.Init.AutoRetransmission   = ENABLE;
   hfdcan1.Init.TransmitPause        = ENABLE;
   hfdcan1.Init.ProtocolException    = ENABLE;
 
-  hfdcan1.Init.NominalPrescaler     = 5;
-  hfdcan1.Init.NominalSyncJumpWidth = 8;
-  hfdcan1.Init.NominalTimeSeg1      = 13;
-  hfdcan1.Init.NominalTimeSeg2      = 2;
+  hfdcan1.Init.NominalPrescaler     = p_can_baud[baud].prescalse;
+  hfdcan1.Init.NominalSyncJumpWidth = p_can_baud[baud].sjw;
+  hfdcan1.Init.NominalTimeSeg1      = p_can_baud[baud].tseg1;
+  hfdcan1.Init.NominalTimeSeg2      = p_can_baud[baud].tseg2;
 
-  hfdcan1.Init.DataPrescaler        = 4;
-  hfdcan1.Init.DataSyncJumpWidth    = 8;
-  hfdcan1.Init.DataTimeSeg1         = 11;
-  hfdcan1.Init.DataTimeSeg2         = 8;
+
+  hfdcan1.Init.DataPrescaler        = p_can_data[data].prescalse;
+  hfdcan1.Init.DataSyncJumpWidth    = p_can_data[data].sjw;
+  hfdcan1.Init.DataTimeSeg1         = p_can_data[data].tseg1;
+  hfdcan1.Init.DataTimeSeg2         = p_can_data[data].tseg2;
 
   hfdcan1.Init.StdFiltersNbr = 28;
   hfdcan1.Init.ExtFiltersNbr = 8;
@@ -62,23 +118,79 @@ void MX_FDCAN1_Init(void)
 
   if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
   {
-    Error_Handler();
+    ret = false;
   }
 
+  return ret;
 }
 
 
-void FDCAN_Config(void)
+/* FDCAN1 init function */
+//void MX_FDCAN1_Init(void)
+//{
+//
+//  hfdcan1.Instance          = FDCAN1;
+//  hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
+//  hfdcan1.Init.FrameFormat  = FDCAN_FRAME_CLASSIC;
+//  hfdcan1.Init.Mode         = FDCAN_MODE_NORMAL;
+//
+//  hfdcan1.Init.AutoRetransmission   = ENABLE;
+//  hfdcan1.Init.TransmitPause        = ENABLE;
+//  hfdcan1.Init.ProtocolException    = ENABLE;
+//
+//  hfdcan1.Init.NominalPrescaler     = 5;
+//  hfdcan1.Init.NominalSyncJumpWidth = 8;
+//  hfdcan1.Init.NominalTimeSeg1      = 13;
+//  hfdcan1.Init.NominalTimeSeg2      = 2;
+//
+//  hfdcan1.Init.DataPrescaler        = 4;
+//  hfdcan1.Init.DataSyncJumpWidth    = 8;
+//  hfdcan1.Init.DataTimeSeg1         = 11;
+//  hfdcan1.Init.DataTimeSeg2         = 8;
+//
+//  hfdcan1.Init.StdFiltersNbr = 28;
+//  hfdcan1.Init.ExtFiltersNbr = 8;
+//  hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+//
+//
+//  if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
+//
+//}
+
+
+bool canConfigFilter(uint8_t ch, uint8_t index, can_id_type_t id_type, uint32_t id, uint32_t id_mask)
 {
   FDCAN_FilterTypeDef sFilterConfig;
 
   /* Configure Rx filter */
-  sFilterConfig.IdType        = FDCAN_STANDARD_ID;
-  sFilterConfig.FilterIndex   = 0;
+  //sFilterConfig.IdType        = FDCAN_STANDARD_ID;
+  if (id_type == CAN_STD)
+  {
+    sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  }
+  else
+  {
+    sFilterConfig.IdType = FDCAN_EXTENDED_ID;
+  }
+
+
+  //sFilterConfig.FilterIndex   = 0;
+  sFilterConfig.FilterIndex   = index;
+
   sFilterConfig.FilterType    = FDCAN_FILTER_MASK;
   sFilterConfig.FilterConfig  = FDCAN_FILTER_TO_RXFIFO0;
-  sFilterConfig.FilterID1     = 0x314;
-  sFilterConfig.FilterID2     = 0x7FF;
+
+
+
+  // sFilterConfig.FilterID1     = 0x319;
+  // sFilterConfig.FilterID2     = 0x7FF;
+  sFilterConfig.FilterID1     = id;
+  sFilterConfig.FilterID2     = id_mask;
+
+
 
 
   if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
@@ -106,10 +218,10 @@ void FDCAN_Config(void)
   }
 
   /* Prepare Tx Header */
-  TxHeader.Identifier = 0x314;
+  TxHeader.Identifier = 0x117;
   TxHeader.IdType = FDCAN_STANDARD_ID;
   TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-  TxHeader.DataLength = FDCAN_DLC_BYTES_2;
+  TxHeader.DataLength = FDCAN_DLC_BYTES_3;
   TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
   TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
   TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
@@ -128,12 +240,12 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     }
 
     /* Display LEDx */
-    if ((RxHeader.Identifier == 0x314) && (RxHeader.IdType == FDCAN_STANDARD_ID) && (RxHeader.DataLength == FDCAN_DLC_BYTES_2))
-    {
+   // if ((RxHeader.Identifier == 0x314) && (RxHeader.IdType == FDCAN_STANDARD_ID) && (RxHeader.DataLength == FDCAN_DLC_BYTES_2))
+  //  {
       //LED_Display(RxData[0]);
       ubKeyNumber = RxData[0];
       logPrintf("CAN RX : %x\n",ubKeyNumber);
-    }
+   // }
   }
 }
 

@@ -33,7 +33,11 @@ void hwInit(void)
   uartInit();
   uartOpen(_DEF_UART1, 57600);
 
-  MX_FDCAN1_Init();
+ // MX_FDCAN1_Init();
+  canOpen(_DEF_CAN1, CAN_NORMAL, CAN_CLASSIC, CAN_1M, CAN_2M );
 
-  FDCAN_Config();
+  //FDCAN_Config();
+
+  canConfigFilter(_DEF_CAN1, 0, CAN_STD, 0x0430, 0x7FF);
+  canConfigFilter(_DEF_CAN1, 0, CAN_EXT, 0x0141, 0x7FF);
 }

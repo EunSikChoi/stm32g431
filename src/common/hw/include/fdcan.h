@@ -16,7 +16,7 @@
   *
   ******************************************************************************
   */
-/* Define to prevent recursive inclusion -------------------------------------*/
+
 #ifndef __FDCAN_H__
 #define __FDCAN_H__
 
@@ -24,30 +24,66 @@
 extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-#include "main.h"
 
-/* USER CODE BEGIN Includes */
+#include "hw_def.h"
+#include "fdcan.h"
 
-/* USER CODE END Includes */
 
-extern FDCAN_HandleTypeDef hfdcan1;
+#ifdef _USE_HW_CAN
 
-/* USER CODE BEGIN Private defines */
+#define CAN_MAX_CH            HW_CAN_MAX_CH
+#define CAN_MSG_RX_BUF_MAX    HW_CAN_MSG_RX_BUF_MAX
 
-/* USER CODE END Private defines */
 
-void MX_FDCAN1_Init(void);
+
+typedef enum
+{
+  CAN_NORMAL,
+  CAN_MONITOR,
+  CAN_LOOPBACK
+}can_mode_t;
+
+typedef enum
+{
+  CAN_CLASSIC,
+  CAN_FD_NO_BRS,
+  CAN_FD_BRS
+}can_frame_t;
+
+typedef enum
+{
+  CAN_STD,
+  CAN_EXT
+} can_id_type_t;
+
+typedef enum
+{
+  CAN_100K,
+  CAN_125K,
+  CAN_250K,
+  CAN_500K,
+  CAN_1M,
+  CAN_2M,//
+  CAN_4M,
+  CAN_5M
+} can_baud_t;
+
 void FDCAN_Config(void);
 
-/* USER CODE BEGIN Prototypes */
+bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, can_baud_t data );
+bool canConfigFilter(uint8_t ch, uint8_t index, can_id_type_t id_type, uint32_t id, uint32_t id_mask);
 
-/* USER CODE END Prototypes */
+
+
+#endif
+
 
 #ifdef __cplusplus
 }
 #endif
 
+
+
 #endif /* __FDCAN_H__ */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
