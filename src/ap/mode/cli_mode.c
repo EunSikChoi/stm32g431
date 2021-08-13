@@ -7,10 +7,10 @@
 
 
 #include "cli_mode.h"
+#include "fdcan.h"
 
 
 
-extern uint8_t ubKeyNumber;
 FDCAN_RxHeaderTypeDef RxHeader;
 extern uint8_t RxData[8];
 FDCAN_TxHeaderTypeDef TxHeader;
@@ -26,6 +26,8 @@ bool cliModeInit(void)
 
  void cliModeMain(mode_args_t *args)
  {
+   uint32_t index = 0;
+   can_msg_t msg;
    uint32_t pre_time = millis();
 
    logPrintf("cliMode in\n");
@@ -38,33 +40,58 @@ bool cliModeInit(void)
        ledToggle(_DEF_LED1);
 
 
-//       TxHeader.Identifier = 0x119;
-//       TxHeader.IdType = FDCAN_STANDARD_ID;
-//       TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-//       TxHeader.DataLength = FDCAN_DLC_BYTES_3;
-//       TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-//       TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
-//       TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
-//       TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-//       TxHeader.MessageMarker = 0;
+       // set txheader //
+       msg.frame   = CAN_CLASSIC;
+       msg.id_type = CAN_STD;
+       msg.dlc     = CAN_DLC_2;
+       msg.id      = 0x119;
+       msg.length  = 2;
+       msg.data[0] = 0x04;
+       msg.data[1] = 0x30;
 
-       /* Set the data to be transmitted */
-       TxData[0] = ubKeyNumber;
-       TxData[1] = 0xAD;
-       TxData[2] = 0xBD;
-
-       /* Start the Transmission process */
-       if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData) != HAL_OK)
+       // send data //
+       if (canMsgWrite(_DEF_CAN1, &msg, 10) > 0)
        {
-         /* Transmission request Error */
-         Error_Handler();
+         index %= 1000;
+         cliPrintf("%03d(T) -> id ", index++);
+         if (msg.id_type == CAN_STD)
+         {
+           cliPrintf("std ");
+         }
+         else
+         {
+           cliPrintf("ext ");
+         }
+         cliPrintf(": 0x%08X, L:%02d, ", msg.id, msg.length);
+         for (int i=0; i<msg.length; i++)
+         {
+           cliPrintf("0x%02X ", msg.data[i]);
+         }
+         cliPrintf("\n");
        }
 
-       HAL_Delay(10);
+       // read data //
+       if (canMsgAvailable(_DEF_CAN1))
+       {
+         canMsgRead(_DEF_CAN1, &msg);
 
-
-
-
+         index %= 1000;
+         cliPrintf("%03d(R) <- id ", index++);
+         if (msg.id_type == CAN_STD)
+         {
+           cliPrintf("std ");
+         }
+         else
+         {
+           cliPrintf("ext ");
+         }
+         cliPrintf(": 0x%08X, L:%02d, ", msg.id, msg.length);
+         for (int i=0; i<msg.length; i++)
+         {
+           cliPrintf("0x%02X ", msg.data[i]);
+         }
+         cliPrintf("\n");
+       }
      }
 
      cliMain();

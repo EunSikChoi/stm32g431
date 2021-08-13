@@ -68,10 +68,57 @@ typedef enum
   CAN_5M
 } can_baud_t;
 
+
+typedef enum
+{
+  CAN_DLC_0,
+  CAN_DLC_1,
+  CAN_DLC_2,
+  CAN_DLC_3,
+  CAN_DLC_4,
+  CAN_DLC_5,
+  CAN_DLC_6,
+  CAN_DLC_7,
+  CAN_DLC_8,
+  CAN_DLC_12,
+  CAN_DLC_16,
+  CAN_DLC_20,
+  CAN_DLC_24,
+  CAN_DLC_32,
+  CAN_DLC_48,
+  CAN_DLC_64
+} can_dlc_t;
+
+typedef enum
+{
+  CAN_ERR_NONE      = 0x00000000,
+  CAN_ERR_PASSIVE   = 0x00000001,
+  CAN_ERR_WARNING   = 0x00000002,
+  CAN_ERR_BUS_OFF   = 0x00000004,
+  CAN_ERR_BUS_FAULT = 0x00000008,
+} can_err_t;
+
+
+typedef struct
+{
+  uint32_t id;
+  uint16_t length;
+  uint8_t  data[64];
+
+  can_dlc_t      dlc;
+  can_id_type_t  id_type;
+  can_frame_t    frame;
+} can_msg_t;
+
 void FDCAN_Config(void);
 
-bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, can_baud_t data );
+bool canInit(void);
+bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, can_baud_t baud_data );
 bool canConfigFilter(uint8_t ch, uint8_t index, can_id_type_t id_type, uint32_t id, uint32_t id_mask);
+uint32_t canMsgAvailable(uint8_t ch);
+bool canMsgWrite(uint8_t ch, can_msg_t *p_msg, uint32_t timeout);
+bool canMsgRead(uint8_t ch, can_msg_t *p_msg);
+bool canMsgInit(can_msg_t *p_msg, can_frame_t frame, can_id_type_t  id_type, can_dlc_t dlc);
 
 
 
