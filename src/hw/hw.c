@@ -40,6 +40,11 @@ void hwInit(void)
 
   //FDCAN_Config();
 
-  canConfigFilter(_DEF_CAN1, 0, CAN_STD, 0x0430, 0x7FF);
-  canConfigFilter(_DEF_CAN1, 0, CAN_EXT, 0x0141, 0x7FF);
+  //canConfigFilter(_DEF_CAN1, 25, CAN_STD, CAN_FILTER_CLASSIC, 0x0430, 0x7FF); // if CAN_STD : index 0 -27 //
+  //canConfigFilter(_DEF_CAN1,  6, CAN_EXT, CAN_FILTER_CLASSIC, 0x0141, 0x7FF); // if CAN_EXT : index 0 -7  //
+
+  canConfigFilter(_DEF_CAN1, 25, CAN_STD, CAN_FILTER_RANGE, 0x0430, 0x433); // if CAN_STD : index 0 -27 //
+  canConfigFilter(_DEF_CAN1,  6, CAN_EXT, CAN_FILTER_RANGE, 0x0141, 0x143); // if CAN_EXT : index 0 -7  //
+
+
 }

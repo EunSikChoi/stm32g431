@@ -58,6 +58,15 @@ typedef enum
 
 typedef enum
 {
+  CAN_FILTER_RANGE,
+  CAN_FILTER_DUAL,
+  CAN_FILTER_CLASSIC,
+  CAN_FILTER_NO_EIDM
+} can_filter_type_t;
+
+
+typedef enum
+{
   CAN_100K,
   CAN_125K,
   CAN_250K,
@@ -114,12 +123,14 @@ void FDCAN_Config(void);
 
 bool canInit(void);
 bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, can_baud_t baud_data );
-bool canConfigFilter(uint8_t ch, uint8_t index, can_id_type_t id_type, uint32_t id, uint32_t id_mask);
+bool canConfigFilter(uint8_t ch, uint8_t index, can_id_type_t id_type, can_filter_type_t filter_type, uint32_t id, uint32_t id_mask);
 uint32_t canMsgAvailable(uint8_t ch);
 bool canMsgWrite(uint8_t ch, can_msg_t *p_msg, uint32_t timeout);
 bool canMsgRead(uint8_t ch, can_msg_t *p_msg);
 bool canMsgInit(can_msg_t *p_msg, can_frame_t frame, can_id_type_t  id_type, can_dlc_t dlc);
-
+uint16_t canGetRxErrCount(uint8_t ch);
+uint16_t canGetTxErrCount(uint8_t ch);
+void canErrPrint(uint8_t ch);
 
 
 #endif
