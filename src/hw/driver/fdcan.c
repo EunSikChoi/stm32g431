@@ -592,20 +592,79 @@ void cliCan(cli_args_t *args)
   {
     for (int i=0; i<CAN_MAX_CH; i++)
     {
-      cliPrintf("is_open       : %d\n", can_tbl[i].is_open);
 
-      cliPrintf("q_rx_full_cnt : %d\n", can_tbl[i].q_rx_full_cnt);
-      cliPrintf("q_tx_full_cnt : %d\n", can_tbl[i].q_tx_full_cnt);
-      cliPrintf("fifo_full_cnt : %d\n", can_tbl[i].fifo_full_cnt);
-      cliPrintf("fifo_lost_cnt : %d\n", can_tbl[i].fifo_lost_cnt);
-      canErrPrint(i);
+      cliPrintf(" \n");
+
+      switch(can_tbl[i].is_open )
+      {
+        case 0 :
+          cliPrintf("Ch OPEN : False\n");
+          break;
+        case 1 :
+          cliPrintf("Ch OPEN : OK\n");
+          break;
+      }
+
+      switch(can_tbl[i].mode )
+      {
+        case CAN_NORMAL :
+          cliPrintf("  Mode  : CAN_NORMAL\n");
+          break;
+        case CAN_MONITOR :
+          cliPrintf("  Mode  : CAN_MONITOR\n");
+          break;
+        case CAN_LOOPBACK :
+          cliPrintf("  Mode  : CAN_LOOPBACK\n");
+          break;
+      }
+
+      switch(can_tbl[i].frame)
+      {
+        case CAN_CLASSIC :
+          cliPrintf("  Frame : CAN_CLASSIC\n");
+          break;
+        case CAN_FD_NO_BRS :
+          cliPrintf("  Frame : CAN_FD_NO_BRS\n");
+          break;
+        case CAN_FD_BRS :
+          cliPrintf("  Frame : CAN_FD_BRS\n");
+          break;
+      }
+
+      switch(can_tbl[i].baud)
+      {
+        case CAN_100K:
+          cliPrintf("  Baud   : CAN_100K\n");
+          break;
+        case CAN_125K:
+          cliPrintf("  Baud   : CAN_125K\n");
+          break;
+        case CAN_250K:
+          cliPrintf("  Baud   : CAN_250K\n");
+          break;
+        case CAN_500K:
+          cliPrintf("  Baud   : CAN_500K\n");
+          break;
+        case CAN_1M:
+          cliPrintf("  Baud  : CAN_1M\n");
+          break;
+        case CAN_2M:
+          cliPrintf("  Baud  : CAN_2M\n");
+          break;
+        case CAN_4M:
+          cliPrintf("  Baud  : CAN_4M\n");
+          break;
+        case CAN_5M:
+          cliPrintf("  Baud  : CAN_5M\n");
+          break;
+      }
+
+      // if change Config, Change Cli info printf //
+      cliPrintf("Filter  : CAN_STD, CAN_FILTER_RANGE, 0x0430, 0x433\n");
+      cliPrintf("Filter  : CAN_EXT, CAN_FILTER_RANGE, 0x0141, 0x143\n");
+
     }
     ret = true;
-  }
-
-  if (args->argc == 1 && args->isStr(0, "read"))
-  {
-
   }
 
 
@@ -712,16 +771,30 @@ void cliCan(cli_args_t *args)
 
     cliPrintf("RESET OK\n");
 
+    ret = true;
 
   }// END RESET
+
+  if (args->argc == 1 && args->isStr(0, "Errcnt"))
+  {
+    for (int i=0; i<CAN_MAX_CH; i++)
+    {
+      cliPrintf("  q_rx_full_cnt : %d\n", can_tbl[i].q_rx_full_cnt);
+      cliPrintf("  q_tx_full_cnt : %d\n", can_tbl[i].q_tx_full_cnt);
+      cliPrintf("  fifo_full_cnt : %d\n", can_tbl[i].fifo_full_cnt);
+      cliPrintf("  fifo_lost_cnt : %d\n", can_tbl[i].fifo_lost_cnt);
+      canErrPrint(i);
+    }
+    ret = true;
+  }
 
 
   if (ret == false)
   {
     cliPrintf("can info\n");
-    cliPrintf("can read\n");
     cliPrintf("can send\n");
     cliPrintf("can reset\n");
+    cliPrintf("can Errcnt\n");
   }
 }// END CLI
 #endif

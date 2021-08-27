@@ -38,7 +38,7 @@ void hwInit(void)
  // MX_FDCAN1_Init();
   canOpen(_DEF_CAN1, CAN_NORMAL, CAN_CLASSIC, CAN_1M, CAN_2M );
 
-  //FDCAN_Config();
+  // if change Config, Change Cli info printf //
 
   //canConfigFilter(_DEF_CAN1, 25, CAN_STD, CAN_FILTER_CLASSIC, 0x0430, 0x7FF); // if CAN_STD : index 0 -27 //
   //canConfigFilter(_DEF_CAN1,  6, CAN_EXT, CAN_FILTER_CLASSIC, 0x0141, 0x7FF); // if CAN_EXT : index 0 -7  //

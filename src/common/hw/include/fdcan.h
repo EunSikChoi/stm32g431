@@ -119,7 +119,6 @@ typedef struct
   can_frame_t    frame;
 } can_msg_t;
 
-void FDCAN_Config(void);
 
 bool canInit(void);
 bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, can_baud_t baud_data );
