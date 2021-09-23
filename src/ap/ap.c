@@ -22,6 +22,8 @@ typedef enum
 } ap_mode_t;
 
 
+
+
 ap_mode_t mode = MODE_IDEL;
 ap_mode_t mode_next = MODE_IDEL;
 
@@ -35,6 +37,8 @@ static mode_args_t mode_args;
 void apInit(void)
 {
   cliOpen(_DEF_UART1, 57600);  //CDC//FOR USB
+
+  i2cOpen();
 
   mode_args.keepLoop = apLoopIdle; // define point func // keepLoop = apLoopIdle
 

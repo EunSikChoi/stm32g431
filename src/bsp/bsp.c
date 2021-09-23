@@ -22,6 +22,8 @@ void bspInit(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
 
 }
 
@@ -38,6 +40,8 @@ uint32_t millis(void)
   return HAL_GetTick();
   //return 0;
 }
+
+
 
 
 void SystemClock_Config(void)
@@ -87,8 +91,9 @@ void SystemClock_Config(void)
   }
   /** Initializes the peripherals clocks
   */
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USB
-                              |RCC_PERIPHCLK_FDCAN;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_I2C1
+                              |RCC_PERIPHCLK_USB|RCC_PERIPHCLK_FDCAN;
+  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   PeriphClkInit.FdcanClockSelection = RCC_FDCANCLKSOURCE_PLL;
   PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
   PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
@@ -98,6 +103,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
 
 
 void Error_Handler(void)

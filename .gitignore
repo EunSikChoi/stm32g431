@@ -4,3 +4,4 @@ Debug/
 .settings/org.eclipse.cdt.core.prefs
 src/lib/cube_g431/Middlewares/
 src/lib/cube_g431/USB_Device/
+src/lib/cube_g431/Core/

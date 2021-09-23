@@ -7,6 +7,7 @@
 
 
 #include "cli_mode.h"
+#include "i2c.h"
 
 
 bool cliModeInit(void)
@@ -14,6 +15,9 @@ bool cliModeInit(void)
   return true;
 }
 
+
+uint8_t aTxBuffer[] = "I2C_TwoBoards";
+uint8_t aRxBuffer[13];
 
  void cliModeMain(mode_args_t *args)
  {
@@ -28,6 +32,10 @@ bool cliModeInit(void)
      {
        pre_time = millis();
        ledToggle(_DEF_LED1);
+
+       HAL_I2C_Master_Transmit(&hi2c1, (uint16_t)0x54, (uint8_t *)aTxBuffer, 13, 500);
+       //HAL_I2C_Slave_Transmit(&hi2c1, (uint8_t *)aTxBuffer, 13, 500);
+
      }
 
      cliMain();
