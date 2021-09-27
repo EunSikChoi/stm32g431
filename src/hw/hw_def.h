@@ -43,6 +43,9 @@
 #define      HW_USE_CDC     1
 #define      HW_USE_MSC     0
 
+#define _USE_HW_I2C
+#define      HW_I2C_MAX_CH          1
+
 
 
 #endif /* SRC_HW_HW_DEF_H_ */

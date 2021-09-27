@@ -16,8 +16,8 @@ bool cliModeInit(void)
 }
 
 
-uint8_t aTxBuffer[] = "I2C_TwoBoards";
-uint8_t aRxBuffer[13];
+//uint8_t aTxBuffer[] = "I2C_TwoBoards";
+//uint8_t aRxBuffer[13];
 
  void cliModeMain(mode_args_t *args)
  {
@@ -33,8 +33,9 @@ uint8_t aRxBuffer[13];
        pre_time = millis();
        ledToggle(_DEF_LED1);
 
-       HAL_I2C_Master_Transmit(&hi2c1, (uint16_t)0x54, (uint8_t *)aTxBuffer, 13, 500);
-       //HAL_I2C_Slave_Transmit(&hi2c1, (uint8_t *)aTxBuffer, 13, 500);
+      // HAL_I2C_Master_Transmit(&hi2c1, (uint16_t)0x38, (uint8_t *)aTxBuffer, 13, 500);
+      // HAL_I2C_Mem_Read(&hi2c1, (uint16_t)(0x38 << 1), 0x92, I2C_MEMADD_SIZE_8BIT, aRxBuffer, 1, 100);
+
 
      }
 
