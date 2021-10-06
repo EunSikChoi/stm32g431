@@ -30,7 +30,9 @@ uint8_t RxData[8];
 FDCAN_TxHeaderTypeDef TxHeader;
 uint8_t TxData[8];
 
+static volatile uint32_t err_int_cnt = 0;
 
+static void canErrUpdate(uint8_t ch);
 
 FDCAN_HandleTypeDef hfdcan1;
 
@@ -219,8 +221,9 @@ bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, c
   can_tbl[ch].baud_data             = baud_data;
   can_tbl[ch].fifo_idx              = FDCAN_RX_FIFO0;
   can_tbl[ch].enable_int            = FDCAN_IT_LIST_RX_FIFO0 |
-                                      FDCAN_IT_LIST_PROTOCOL_ERROR |
-                                      FDCAN_IT_LIST_BIT_LINE_ERROR;
+                                      FDCAN_IT_BUS_OFF       |
+                                      FDCAN_IT_ERROR_PASSIVE |
+                                      FDCAN_IT_ERROR_WARNING;
                                      // Error CallBack Enable //
 
   can_tbl[ch].is_open = true;
@@ -440,13 +443,24 @@ void canErrPrint(uint8_t ch) // Error Print//
 }
 
 
+
+
+
 void HAL_FDCAN_ErrorCallback(FDCAN_HandleTypeDef *hfdcan) // update error code status //
 {
   uint8_t ch = _DEF_CAN1;
+
+  err_int_cnt++;
+
+  canErrUpdate(ch);
+
+}
+
+void canErrUpdate(uint8_t ch)
+{
   FDCAN_ProtocolStatusTypeDef protocol_status;
 
-
-  HAL_FDCAN_GetProtocolStatus(hfdcan, &protocol_status);
+  HAL_FDCAN_GetProtocolStatus(&hfdcan1, &protocol_status);
 
   if (protocol_status.ErrorPassive)
   {
@@ -477,6 +491,7 @@ void HAL_FDCAN_ErrorCallback(FDCAN_HandleTypeDef *hfdcan) // update error code s
 }
 
 
+
 void canRecovery(uint8_t ch)
 {
   if(ch > CAN_MAX_CH) return;
@@ -495,6 +510,8 @@ bool canUpdate(void)
   for (int i=0; i<CAN_MAX_CH; i++)
   {
     p_can = &can_tbl[i];
+
+    canErrUpdate(i); // check err if callback miss
 
     switch(p_can->state)
     {
@@ -717,6 +734,13 @@ void cliCan(cli_args_t *args)
         if (canGetRxErrCount(_DEF_CAN1) > 0 || canGetTxErrCount(_DEF_CAN1) > 0)
         {
           cliPrintf("ErrCnt : REC=%d,  TEC=%d\n", canGetRxErrCount(_DEF_CAN1), canGetTxErrCount(_DEF_CAN1));
+        }
+
+        if(err_int_cnt > 0)
+        {
+
+          cliPrintf("CallBack Err Cnt : %d\n", err_int_cnt);
+          err_int_cnt = 0; // reset int cnt //
         }
 
         // Print Err Log //
