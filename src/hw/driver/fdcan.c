@@ -224,8 +224,8 @@ bool canOpen(uint8_t ch, can_mode_t mode, can_frame_t frame,  can_baud_t baud, c
                                       FDCAN_IT_BUS_OFF       |
                                       FDCAN_IT_ERROR_PASSIVE |
                                       FDCAN_IT_ERROR_WARNING;
-                                     // Error CallBack Enable //
-
+                                     // Error CallBack INT Enable //
+//FDCAN_IT_LIST_RX_FIFO0
   can_tbl[ch].is_open = true;
 
 
@@ -283,7 +283,7 @@ bool canConfigFilter(uint8_t ch, uint8_t index, can_id_type_t id_type, can_filte
   }
 
   //if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-  if (HAL_FDCAN_ActivateNotification(&hfdcan1, can_tbl[ch].enable_int, 0) != HAL_OK)
+  if (HAL_FDCAN_ActivateNotification(&hfdcan1, can_tbl[ch].enable_int, 0) != HAL_OK)  // enable INT Set //
   {
     Error_Handler();
   }
@@ -444,8 +444,8 @@ void canErrPrint(uint8_t ch) // Error Print//
 
 
 
-
-
+//For #define FDCAN_ERROR_MASK (FDCAN_IR_ELO | FDCAN_IR_WDI | FDCAN_IR_PEA | FDCAN_IR_PED | FDCAN_IR_ARA)
+// Set Enable Err INT //
 void HAL_FDCAN_ErrorCallback(FDCAN_HandleTypeDef *hfdcan) // update error code status //
 {
   uint8_t ch = _DEF_CAN1;
@@ -455,6 +455,19 @@ void HAL_FDCAN_ErrorCallback(FDCAN_HandleTypeDef *hfdcan) // update error code s
   canErrUpdate(ch);
 
 }
+
+
+// for #define FDCAN_ERROR_STATUS_MASK (FDCAN_IR_EP | FDCAN_IR_EW | FDCAN_IR_BO)
+// EP = Error Passitive , EW = Error Warning , BO = Bus Off Err //
+void HAL_FDCAN_ErrorStatusCallback(FDCAN_HandleTypeDef *hfdcan, uint32_t ErrorStatusITs)
+{
+  uint8_t ch = _DEF_CAN1;
+
+  err_int_cnt++;
+
+  canErrUpdate(ch);
+}
+
 
 void canErrUpdate(uint8_t ch)
 {
