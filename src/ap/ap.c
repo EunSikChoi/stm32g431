@@ -103,6 +103,8 @@ bool apLoopIdle(void)
   if(mode != mode_next )
   {
     uartPrintf(_DEF_UART1, "\n Change bps: %d\n", uartGetBaud(_DEF_UART1));
+    logPrintf("BPS Log : %d\n", uartGetBaud(_DEF_UART1));
+
     mode = mode_next;
     ret = false;
 

@@ -181,6 +181,9 @@ bool canInit(void)
 #ifdef _USE_HW_CLI
   cliAdd("can", cliCan);
 #endif
+
+  logPrintf("canInit     \t\t: CAN_Ok\r\n");
+
   return ret;
 }
 

@@ -13,12 +13,21 @@
 #include "def.h"
 #include "bsp.h"
 
+#define _DEF_FIRMWATRE_VERSION    "V211013R2"
+#define _DEF_BOARD_NAME           "STM32G431"
+
+
 
 #define _USE_HW_LED
 #define      HW_LED_MAX_CH  2
 
 #define _USE_HW_UART
 #define      HW_UART_MAX_CH  1
+
+#define _USE_HW_LOG
+#define      HW_LOG_CH              _DEF_UART1
+#define      HW_LOG_BOOT_BUF_MAX    1024
+#define      HW_LOG_LIST_BUF_MAX    2048
 
 #define _USE_HW_LOG
 #define      HW_LOG_CH _DEF_UART1

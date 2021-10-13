@@ -27,6 +27,7 @@ bool i2cInit(void)
   cliAdd("i2c", cliI2C);
 #endif
 
+  logPrintf("I2c_Init     \t\t: I2C_Ok\r\n");
 
   return ret;
 }

@@ -61,6 +61,8 @@ bool   uartOpen(uint8_t ch , uint32_t baud)
        break;
   }
 
+  logPrintf("uartOpen     \t\t: DEF_UART1\r\n");
+
   return ret;
 
 }

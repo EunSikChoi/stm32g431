@@ -16,7 +16,7 @@ void hwInit(void)
   bspInit();
 
   cliInit();
-
+  logInit();
   rtcInit();
   resetInit();
   ledInit();
@@ -27,15 +27,19 @@ void hwInit(void)
     resetToSysBoot();
   }
 
+  logPrintf("[ Firmware Begin... ]\r\n");
+  logPrintf("Booting..Name \t\t: %s\r\n", _DEF_BOARD_NAME);
+  logPrintf("Booting..Ver  \t\t: %s\r\n", _DEF_FIRMWATRE_VERSION);
+
   usbInit();
   usbBegin(USB_CDC_MODE);
-
   uartInit();
   uartOpen(_DEF_UART1, 57600);
-
   canInit();
-
   i2cInit();
+
+  logBoot(false); // END Boot log //
+
 
  // MX_FDCAN1_Init();
   canOpen(_DEF_CAN1, CAN_NORMAL, CAN_CLASSIC, CAN_1M, CAN_2M );
