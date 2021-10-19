@@ -194,7 +194,7 @@ void cliCmd(cli_args_t *args)
 {
   bool ret = false;
   //char data[230] = {0};
-  char data[20] = "12345678901234567890";
+  //char data[20] = "12345678901234567890";
   bool i2cret = false;
 
 
@@ -213,12 +213,12 @@ void cliCmd(cli_args_t *args)
   if (args->argc == 1 && args->isStr(0, "boot"))
   {
     uint32_t index = 0;
-    uint16_t i2c_index = 0;
+
 
     while(cliKeepLoop())
     {
       uint32_t buf_len;
-      uint32_t i2c_len;
+
 
       buf_len = log_buf_boot.buf_length - index;
       if (buf_len == 0)
@@ -270,8 +270,10 @@ void cliCmd(cli_args_t *args)
 
   if (args->argc == 1 && args->isStr(0, "list"))
   {
+
+    uint8_t  offset = 0, H_data = 0, L_data = 0;
+    uint16_t flash_addr = 0;
     uint32_t index = 0;
-    uint8_t offset = 0;
 
 
     while(cliKeepLoop())
@@ -284,7 +286,7 @@ void cliCmd(cli_args_t *args)
       {
         #if 1
 
-          for (uint32_t i=0; i<log_buf_list.buf_length; i++) //log_buf_list.buf_length
+          for (uint32_t i=0; i<log_buf_list.buf_length; i++)
           {
             if(i <= 255)
             {
@@ -292,16 +294,37 @@ void cliCmd(cli_args_t *args)
               i2cret = logtoi2cWrite(0, 0x50,  (uint16_t)i   , (uint8_t)log_buf_list.buf[i],  100);
               delay(1);
             }
-            else
+            else if( i >= 256 && i <= 512)
             {
-              offset = i-255;
+              offset = i-256;
 
               ledOn(_DEF_LED1);
-              i2cret = logtoi2cWrite(0, 0x50,  (uint16_t)offset   , (uint8_t)log_buf_list.buf[i],  100);
+              i2cret = logtoi2cWrite(0, 0x51,  (uint16_t)offset   , (uint8_t)log_buf_list.buf[i],  100);
+              delay(1);
+            }
+            else
+            {
+              offset = i-512;
+
+              ledOn(_DEF_LED1);
+              i2cret = logtoi2cWrite(0, 0x52,  (uint16_t)offset   , (uint8_t)log_buf_list.buf[i],  100);
               delay(1);
             }
 
           }
+
+          // Save log Flash Addr //
+          flash_addr = log_buf_list.buf_length;
+          H_data     = HI_BYTE(flash_addr);
+          L_data     = LO_BYTE(flash_addr);
+
+          i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)254   , (uint8_t)H_data,  100);
+          delay(1);
+
+          i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)255   , (uint8_t)L_data,  100);
+          delay(1);
+          //  END SAVE //
+
 
           if(i2cret == 1)
           {
@@ -339,7 +362,8 @@ void cliCmd(cli_args_t *args)
 
   if (args->argc == 1 && args->isStr(0, "flash"))
   {
-    uint32_t index = 0;
+    uint8_t READ[2]={0};
+    uint16_t flash_length =0;
     uint32_t offset = 0;
 
     while(cliKeepLoop())
@@ -347,7 +371,21 @@ void cliCmd(cli_args_t *args)
 
       cliPrintf(" ces  : %d \n", log_buf_list.buf_length);
 
-      for (uint32_t i=0; i<log_buf_list.buf_length; i++) //log_buf_list.buf_length
+     // Make log Flash Addr //
+      i2cret       = (uint16_t)logtoi2cRead(0, 0x57, 254, &READ[0], 100); // High 8 bit
+      i2cret       = (uint16_t)logtoi2cRead(0, 0x57, 255, &READ[1], 100); // low 8 bit
+      flash_length = (uint16_t)MAKE_WORD((uint8_t)READ[0], (uint8_t)READ[1]);
+
+      if (i2cret != true)
+      {
+        cliPrintf("MAKE Addr False \n, ");
+        break;
+      }
+     //cliPrintf("MAKE WORD : %d \n, ", flash_length);
+     //  END MAKE //
+
+
+      for (uint32_t i=0; i<flash_length; i++)
       {
         if(i <= 255)
         {
@@ -355,11 +393,18 @@ void cliCmd(cli_args_t *args)
           i2cret = logtoi2cRead(0, 0x50, i, &buf_flash[i], 100);
           delay(1);
         }
+        else if( i >= 256 && i <= 511)
+        {
+          offset = i-256;
+          ledOn(_DEF_LED1);
+          i2cret = logtoi2cRead(0, 0x51, offset, &buf_flash[i], 100);
+          delay(1);
+        }
         else
         {
-          offset = i-255;
+          offset = i-512;
           ledOn(_DEF_LED1);
-          i2cret = logtoi2cRead(0, 0x50, offset, &buf_flash[i], 100);
+          i2cret = logtoi2cRead(0, 0x52, offset, &buf_flash[i], 100);
           delay(1);
         }
 
@@ -369,7 +414,7 @@ void cliCmd(cli_args_t *args)
       if (i2cret == true)
       {
         cliPrintf("i2c OK\n");
-        cliWrite((uint8_t *)&buf_flash[0],  (uint32_t)log_buf_list.buf_length);
+        cliWrite((uint8_t *)&buf_flash[0],  (uint32_t)flash_length);
       }
       else
       {
@@ -388,6 +433,7 @@ void cliCmd(cli_args_t *args)
     cliPrintf("log info\n");
     cliPrintf("log boot\n");
     cliPrintf("log list\n");
+    cliPrintf("log flash\n");
   }
 }
 #endif

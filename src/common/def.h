@@ -86,5 +86,14 @@
 
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 
+#define HI_BYTE(data) ((uint8_t)(((data) >> 8) & 0xff))
+#define LO_BYTE(data) ((uint8_t)((data) & 0xff))
+
+#define MAKE_WORD(hi, lo) (uint16_t)(((uint16_t)(LO_BYTE(hi)) << 8) + (lo & 0xff))
+
+
+
+
+
 
 #endif /* SRC_COMMON_DEF_H_ */
