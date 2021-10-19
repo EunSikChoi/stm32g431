@@ -14,12 +14,12 @@ void hwInit(void)
 {
 
   bspInit();
-
+  ledInit();
   cliInit();
   logInit();
   rtcInit();
   resetInit();
-  ledInit();
+
 
   if( resetGetCount() == 2)
   {

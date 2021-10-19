@@ -12,6 +12,7 @@
 //I2C_HandleTypeDef hi2c1;
 
 
+
 #ifdef _USE_HW_CLI
 static void cliI2C(cli_args_t *args);
 #endif
@@ -137,6 +138,9 @@ bool i2cWriteBytes(uint8_t ch, uint16_t dev_addr, uint16_t reg_addr, uint8_t *p_
 }
 
 
+
+
+
 void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
 {
 
@@ -219,6 +223,7 @@ void cliI2C(cli_args_t *args)
   uint32_t i;
   uint8_t aRxBuffer[13];
   uint8_t i2c_data[128];
+  char data[10] = "hello";
   uint32_t pre_time;
 
 
@@ -268,7 +273,7 @@ void cliI2C(cli_args_t *args)
 
         if (i2c_ret == true)
         {
-          cliPrintf("%d I2C - 0x%02X : 0x%02X\n", print_ch, reg_addr+i, i2c_data[0]);
+          cliPrintf("%d I2C - 0x%02X : 0x%02X char :%c\n", print_ch, reg_addr+i, i2c_data[0],i2c_data[0]);
         }
         else
         {
@@ -291,6 +296,26 @@ void cliI2C(cli_args_t *args)
         cliPrintf("%d I2C - Fail \n", print_ch);
       }
     }
+    else if(args->isStr(0, "test") == true)
+    {
+      pre_time = millis();
+      //i2c_ret = i2cWriteByte(ch, dev_addr, reg_addr, (uint8_t)length, 100);
+      i2c_ret = i2cWriteBytes(ch, dev_addr,  reg_addr, (uint8_t *)&data, length, 100);
+
+     // i2cWriteBytes(1, 0x50,  0x00, (uint8_t *)&data, 10, 100);
+
+
+      if (i2c_ret == true)
+      {
+        cliPrintf("%d I2C - 0x%02X : 0x%02X, %d ms\n", print_ch, reg_addr, length, millis()-pre_time);
+      }
+      else
+      {
+        cliPrintf("%d I2C - Fail \n", print_ch);
+      }
+    }
+
+
     else
     {
         ret = false;
@@ -301,8 +326,24 @@ void cliI2C(cli_args_t *args)
 
 
 
-  if (args->argc == 1 && args->isStr(0, "send"))
+  if (args->argc == 1 && args->isStr(0, "clear"))
   {
+
+    //pre_time = millis();
+    for(int i = 0 ; i< 2047 ; i++)
+    {
+      i2c_ret = i2cWriteByte(0, 0x50, i, (uint8_t)0x0, 1000);
+      delay(1);
+    }
+
+    if (i2c_ret == true)
+    {
+      cliPrintf("I2C - OK\n");
+    }
+    else
+    {
+      cliPrintf("I2C - Fail \n");
+    }
 
     ret = true;
   }
@@ -320,7 +361,7 @@ void cliI2C(cli_args_t *args)
   {
     cliPrintf( "i2c info\n");
     cliPrintf( "i2c scan channel[1~%d]\n", I2C_MAX_CH);
-    cliPrintf( "i2c send\n");
+    cliPrintf( "i2c clear\n");
     cliPrintf( "i2c read\n");
 
 

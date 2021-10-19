@@ -12,6 +12,8 @@
 #include "uart.h"
 #ifdef _USE_HW_CLI
 #include "cli.h"
+#include "i2c.h"
+#include "led.h"
 #endif
 
 
@@ -33,6 +35,7 @@ log_buf_t log_buf_list;
 
 static uint8_t buf_boot[LOG_BOOT_BUF_MAX];
 static uint8_t buf_list[LOG_LIST_BUF_MAX];
+static uint8_t buf_flash[1024];
 
 static bool is_init = false;
 static bool is_boot_log = true;
@@ -111,6 +114,18 @@ bool logOpen(uint8_t ch, uint32_t baud)
   return uartOpen(ch, baud);
 }
 
+
+bool logtoi2cWrite(uint8_t ch, uint16_t dev_addr, uint16_t reg_addr, uint8_t data, uint32_t timeout)
+{
+   return i2cWriteByte(ch, dev_addr,  reg_addr, data, timeout);
+
+}
+
+bool logtoi2cRead(uint8_t ch, uint16_t dev_addr, uint16_t reg_addr, uint8_t *p_data, uint32_t timeout)
+{
+   return i2cReadByte(ch,  dev_addr,  reg_addr, p_data, timeout);
+}
+
 bool logBufPrintf(log_buf_t *p_log, char *p_data, uint32_t length)
 {
   uint32_t buf_last;
@@ -155,7 +170,7 @@ void logPrintf(const char *fmt, ...)
   va_start(args, fmt);
   len = vsnprintf(print_buf, 256, fmt, args);
 
-  if (is_open == open && is_enable == true)
+  if (is_open == true && is_enable == true)
   {
     uartWrite(log_ch, (uint8_t *)print_buf, len); // 나중에 다른 통신 채널로 확인하고자 할때//
   }
@@ -178,6 +193,9 @@ void logPrintf(const char *fmt, ...)
 void cliCmd(cli_args_t *args)
 {
   bool ret = false;
+  //char data[230] = {0};
+  char data[20] = "12345678901234567890";
+  bool i2cret = false;
 
 
 
@@ -195,16 +213,35 @@ void cliCmd(cli_args_t *args)
   if (args->argc == 1 && args->isStr(0, "boot"))
   {
     uint32_t index = 0;
+    uint16_t i2c_index = 0;
 
     while(cliKeepLoop())
     {
       uint32_t buf_len;
+      uint32_t i2c_len;
 
       buf_len = log_buf_boot.buf_length - index;
       if (buf_len == 0)
       {
-        break;
+        #if 0
+          for( int i = 0; i < log_buf_boot.buf_length ; i++)
+          {
+            i2cret = logtoi2cWrite(0, 0x50,  i  , (uint8_t)log_buf_boot.buf[i],  100);
+            delay(1);
+          }
+
+          if(i2cret == 1)
+          {
+            cliPrintf("i2c OK\n");
+          }
+          else
+          {
+            cliPrintf("i2c false\n");
+          }
+        #endif
+          break;
       }
+
       if (buf_len > 64)
       {
         buf_len = 64;
@@ -215,6 +252,13 @@ void cliCmd(cli_args_t *args)
       #endif
 
       cliWrite((uint8_t *)&log_buf_boot.buf[index], buf_len);
+
+      for( uint32_t i = 0; i < buf_len ; i++)
+      {
+        i2cret = logtoi2cWrite(0, 0x50,  index+i  , (uint8_t)log_buf_boot.buf[index+i],  100);
+        delay(1);
+      }
+
       index += buf_len;
 
       #ifdef _USE_HW_ROTS
@@ -227,15 +271,48 @@ void cliCmd(cli_args_t *args)
   if (args->argc == 1 && args->isStr(0, "list"))
   {
     uint32_t index = 0;
+    uint8_t offset = 0;
+
 
     while(cliKeepLoop())
     {
       uint32_t buf_len;
 
       buf_len = log_buf_list.buf_length - index;
+
       if (buf_len == 0)
       {
-        break;
+        #if 1
+
+          for (uint32_t i=0; i<log_buf_list.buf_length; i++) //log_buf_list.buf_length
+          {
+            if(i <= 255)
+            {
+              ledOff(_DEF_LED1);
+              i2cret = logtoi2cWrite(0, 0x50,  (uint16_t)i   , (uint8_t)log_buf_list.buf[i],  100);
+              delay(1);
+            }
+            else
+            {
+              offset = i-255;
+
+              ledOn(_DEF_LED1);
+              i2cret = logtoi2cWrite(0, 0x50,  (uint16_t)offset   , (uint8_t)log_buf_list.buf[i],  100);
+              delay(1);
+            }
+
+          }
+
+          if(i2cret == 1)
+          {
+            cliPrintf("i2c OK\n");
+          }
+          else
+          {
+            cliPrintf("i2c false\n");
+          }
+        #endif
+          break;
       }
       if (buf_len > 64)
       {
@@ -247,6 +324,7 @@ void cliCmd(cli_args_t *args)
       #endif
 
       cliWrite((uint8_t *)&log_buf_list.buf[index], buf_len);
+
       index += buf_len;
 
       #ifdef _USE_HW_ROTS
@@ -254,6 +332,54 @@ void cliCmd(cli_args_t *args)
       #endif
 
     }
+
+
+    ret = true;
+  }
+
+  if (args->argc == 1 && args->isStr(0, "flash"))
+  {
+    uint32_t index = 0;
+    uint32_t offset = 0;
+
+    while(cliKeepLoop())
+    {
+
+      cliPrintf(" ces  : %d \n", log_buf_list.buf_length);
+
+      for (uint32_t i=0; i<log_buf_list.buf_length; i++) //log_buf_list.buf_length
+      {
+        if(i <= 255)
+        {
+          ledOff(_DEF_LED1);
+          i2cret = logtoi2cRead(0, 0x50, i, &buf_flash[i], 100);
+          delay(1);
+        }
+        else
+        {
+          offset = i-255;
+          ledOn(_DEF_LED1);
+          i2cret = logtoi2cRead(0, 0x50, offset, &buf_flash[i], 100);
+          delay(1);
+        }
+
+      }
+
+
+      if (i2cret == true)
+      {
+        cliPrintf("i2c OK\n");
+        cliWrite((uint8_t *)&buf_flash[0],  (uint32_t)log_buf_list.buf_length);
+      }
+      else
+      {
+        cliPrintf("i2c false\n");
+      }
+
+      break;
+
+    }
+
     ret = true;
   }
 
