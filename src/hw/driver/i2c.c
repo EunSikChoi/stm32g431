@@ -47,6 +47,7 @@ bool i2cOpen(void)
   hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
     Error_Handler();
@@ -330,11 +331,18 @@ void cliI2C(cli_args_t *args)
   {
 
     //pre_time = millis();
-    for(int i = 0 ; i< 2047 ; i++)
+
+    for (int k = 0 ; k < 8 ; k++)// 0x50 ~ 0x57 //
     {
-      i2c_ret = i2cWriteByte(0, 0x50, i, (uint8_t)0x0, 1000);
-      delay(1);
+      for(int i = 0 ; i < 256 ; i++)
+      {
+        i2c_ret = i2cWriteByte(0,  0x50 + k , i, (uint8_t)0x0, 100);
+        delay(1);
+      }
     }
+
+
+
 
     if (i2c_ret == true)
     {
