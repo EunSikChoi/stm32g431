@@ -30,6 +30,7 @@ void logDisable(void);
 void logBoot(uint8_t enable);
 void logPrintf(const char *fmt, ...);
 bool logtoi2cWrite(uint8_t ch, uint16_t dev_addr, uint16_t reg_addr, uint8_t data, uint32_t timeout);
+bool logtoi2cWrites(uint8_t ch, uint16_t dev_addr, uint16_t reg_addr, uint8_t *p_data, uint32_t length, uint32_t timeout);
 bool logtoi2cRead(uint8_t ch, uint16_t dev_addr, uint16_t reg_addr, uint8_t *p_data, uint32_t timeout);
 
 
