@@ -326,7 +326,6 @@ void cliI2C(cli_args_t *args)
   }
 
 
-
   if (args->argc == 1 && args->isStr(0, "clear"))
   {
 
@@ -340,9 +339,6 @@ void cliI2C(cli_args_t *args)
         delay(1);
       }
     }
-
-
-
 
     if (i2c_ret == true)
     {
@@ -369,16 +365,9 @@ void cliI2C(cli_args_t *args)
   {
     cliPrintf( "i2c info\n");
     cliPrintf( "i2c scan channel[1~%d]\n", I2C_MAX_CH);
-    cliPrintf( "i2c clear\n");
-    cliPrintf( "i2c read\n");
-
-
-    /*cliPrintf( "i2c open channel[1~%d]\n", I2C_MAX_CH);
     cliPrintf( "i2c read channel dev_addr reg_addr length\n");
     cliPrintf( "i2c write channel dev_addr reg_addr data\n");
-    cliPrintf( "i2c read16 channel dev_addr reg_addr length\n");
-    cliPrintf( "i2c write16 channel dev_addr reg_addr data\n");
-    cliPrintf( "i2c writeData channel dev_addr reg_addr data\n");*/
+    cliPrintf( "i2c clear\n");
   }
 
 

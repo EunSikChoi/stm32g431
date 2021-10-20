@@ -286,15 +286,25 @@ void cliCmd(cli_args_t *args)
     while(cliKeepLoop())
     {
       uint32_t buf_len;
+      uint8_t mem_flag = false;
 
       buf_len = log_buf_list.buf_length - index;
 
       if (buf_len == 0)
       {
-        #if 1
+        // check length //
+        if(log_buf_list.buf_length >= 768) // update if change memory 256 + 256 + 256 = 768 //
+        {
+          cliPrintf("i2c log memory error \n");
+          mem_flag = 1;
+        }
 
+        #if 1
+        if ( mem_flag == 0 )
+        {
           for (uint32_t i=0; i<log_buf_list.buf_length; i++)
           {
+
             if(i <= 255)
             {
               ledOff(_DEF_LED1);
@@ -320,45 +330,45 @@ void cliCmd(cli_args_t *args)
           }
         #endif
 
-          // Save log Flash Addr //
-          flash_addr = log_buf_list.buf_length;
-          H_data     = HI_BYTE(flash_addr);
-          L_data     = LO_BYTE(flash_addr);
+            // Save log Flash Addr //
+            flash_addr = log_buf_list.buf_length;
+            H_data     = HI_BYTE(flash_addr);
+            L_data     = LO_BYTE(flash_addr);
 
-          i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)254   , (uint8_t)H_data,  100);
-          if(i2cret != 1)
-          {
-            cliPrintf("i2c log write false \n");
-            break;
-          }
-          delay(5);
+            i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)254   , (uint8_t)H_data,  100);
+            if(i2cret != 1)
+            {
+              cliPrintf("i2c log write false \n");
+              break;
+            }
+            delay(5);
 
-          i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)255   , (uint8_t)L_data,  100);
-          if(i2cret != 1)
-          {
-            cliPrintf("i2c log write false \n");
-            break;
-          }
-          delay(5);
-          //  END SAVE //
+            i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)255   , (uint8_t)L_data,  100);
+            if(i2cret != 1)
+            {
+              cliPrintf("i2c log write false \n");
+              break;
+            }
+            delay(5);
+            //  END SAVE //
 
-        #if 0
-          i2cret = logtoi2cWrites(0, 0x50, (uint16_t)0, (uint8_t *)&log_buf_list.buf[0]  , 255,  100);
-          //delay(10);
-        #endif
+          #if 0
+            i2cret = logtoi2cWrites(0, 0x50, (uint16_t)0, (uint8_t *)&log_buf_list.buf[0]  , 255,  100);
+            //delay(10);
+          #endif
 
-          // Save log Flash Addr //
-          flash_addr = log_buf_list.buf_length;
-          H_data     = HI_BYTE(flash_addr);
-          L_data     = LO_BYTE(flash_addr);
+            // Save log Flash Addr //
+            flash_addr = log_buf_list.buf_length;
+            H_data     = HI_BYTE(flash_addr);
+            L_data     = LO_BYTE(flash_addr);
 
-          i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)254   , (uint8_t)H_data,  100);
-          delay(1);
+            i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)254   , (uint8_t)H_data,  100);
+            delay(1);
 
-          i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)255   , (uint8_t)L_data,  100);
-          delay(1);
-          //  END SAVE //
+            i2cret = logtoi2cWrite(0, 0x57,  (uint16_t)255   , (uint8_t)L_data,  100);
+            delay(1);
 
+          } // END MEM FLAG //
 
           if(i2cret == 1)
           {
@@ -370,7 +380,9 @@ void cliCmd(cli_args_t *args)
           }
 
           break;
-      }
+      }// end buf len //
+
+
       if (buf_len > 64)
       {
         buf_len = 64;
