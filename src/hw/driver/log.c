@@ -292,10 +292,7 @@ void cliCmd(cli_args_t *args)
       if (buf_len == 0)
       {
         #if 1
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/test/can_init1
           for (uint32_t i=0; i<log_buf_list.buf_length; i++)
           {
             if(i <= 255)
@@ -418,11 +415,11 @@ void cliCmd(cli_args_t *args)
         cliPrintf("MAKE Addr False \n, ");
         break;
       }
-<<<<<<< HEAD
+
      //cliPrintf("MAKE WORD : %d \n, ", flash_length);
-=======
+
       cliPrintf("   last list buf len : %d \n", flash_length);
->>>>>>> origin/test/can_init1
+
      //  END MAKE //
 
 
