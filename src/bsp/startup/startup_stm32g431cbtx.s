@@ -64,42 +64,42 @@ Reset_Handler:
   mov   sp, r0          /* set stack pointer */
 
 /* Copy the data segment initializers from flash to SRAM */
-  ldr r0, =_sdata
-  ldr r1, =_edata
-  ldr r2, =_sidata
-  movs r3, #0
-  b	LoopCopyDataInit
+  ldr r0, =_sdata  		//  r0 = &_sdata //  0x20000000  // start flash addr  //ldr load data 레지스터 의미~ //
+  ldr r1, =_edata  		//  r1 = &_edata //  0x20000474  // end flash addr  //
+  ldr r2, =_sidata	 	//  r2 = &_sidata // 0x08012c2c  // .data영역 전역변수의 초기화 값이 복사되어야할 시작 주소 //
+  movs r3, #0     	 	//  r3 = 0 입력
+  b	LoopCopyDataInit    //  브런치 이동. LoopCopyDataInit 함수로 이동   //
 
 CopyDataInit:
-  ldr r4, [r2, r3]
-  str r4, [r0, r3]
-  adds r3, r3, #4
+  ldr r4, [r2, r3]	    //  r4 = *(r2 + r3) = &_sidata // 0x08012c2c // 초기화된 값이 써여져야할 주소// RAM 영역임, 즉 초기화 값은 FALSH 저장된 값을 RAM에 복사하는 과정을 수행 , Data영역의미 //
+  str r4, [r0, r3]      // *(r0 + r3) = r4  // r0 = &_sdata //  0x20000000  // 즉 r0(FLASH)에 저장된 값을 r4 (RAM) 영역에 써라 의미 //
+  adds r3, r3, #4       // r3 = r3(=0) + 4바이트 // 다음 변수를 쓰기 위해서 lndex 정보 +4 해줌 //
 
 LoopCopyDataInit:
-  adds r4, r0, r3
-  cmp r4, r1
-  bcc CopyDataInit
+  adds r4, r0, r3       // r4 = r0 + r3 // 시작 주소에 + r3 =(0, 초기는 0) 값 더하고
+  cmp r4, r1            // r4가 r1 보다. 즉 END 주소보다 작으면
+  bcc CopyDataInit      // b 브랜치이동 cc 작으면(위조건보다) CopyDataInit 함수로 이동   // 즉 END 주소 영역까지 CopyData 반복 실행 // 초기화 영역 DATA 값 RAM 복사해줌
   
 /* Zero fill the bss segment. */
-  ldr r2, =_sbss
-  ldr r4, =_ebss
+  ldr r2, =_sbss        //  r2 = &_sbss // 0x20000474    // bss영역 즉 초기화 안된 전역변수를 초기화 하기 위해서 "0"으로 r2, r4에 주소 정의
+  ldr r4, =_ebss		//  r2 = &_ebss // 0x20003aac
   movs r3, #0
-  b LoopFillZerobss
+  b LoopFillZerobss     // 브랜치 이동 LoopFillzero 함수
 
 FillZerobss:
-  str  r3, [r2]
-  adds r2, r2, #4
+  str  r3, [r2]         // *r2(&_sbss) = r3(0) 값 0 넣기 시작 주소 영역에 // 즉 r2 시작 주소에 0 을 채워 넣기 시작
+  adds r2, r2, #4		// r2 = r2(=0) + 4바이트 // 다음 변수를 쓰기 위해서 lndex 정보 + 4 해줌 //
 
 LoopFillZerobss:
-  cmp r2, r4
-  bcc FillZerobss
+  cmp r2, r4			// 시작 주소 와 끝나는 주소를 비교해서
+  bcc FillZerobss       // r2 시작주소가 r4 끝나는 주소보다 작으면 FillZero 함수로 브랜치 이동
 
 /* Call the clock system initialization function.*/
     bl  SystemInit
 /* Call static constructors */
     bl __libc_init_array
 /* Call the application's entry point.*/
-	bl	main
+	bl	main             // 위에 data 영역과 bss 영역 초기화 및 시스템 초기화 하고 브랜치 이동 main() 으로 여기부터가 main 진입 //
 
 LoopForever:
     b LoopForever
